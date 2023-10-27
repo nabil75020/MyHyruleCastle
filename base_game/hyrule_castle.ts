@@ -1,6 +1,4 @@
-import { link } from "fs";
 import { Character, Characters } from "./fct/characters/characters";
-import { argv } from "process";
 import * as readline from "readline";
 
 const rl = readline.createInterface({
@@ -15,7 +13,7 @@ let hero: Character = {
   str: 15,
 };
 
-let ennemi: Character = {
+let enemy: Character = {
   name: "Bokoblin",
   hp: 30,
   hp_max: 30,
@@ -30,7 +28,7 @@ let boss: Character = {
 
 let players: Characters = {
   Link: hero,
-  Vilains: ennemi,
+  Villains: enemy,
 };
 
 function heroHeal() {
@@ -42,30 +40,30 @@ function heroHeal() {
 
 async function choice(
   Link: Character,
-  Vilains: Character
+  Villains: Character
 ): Promise<Characters> {
   return new Promise(async (resolve) => {
     rl.question(
-      "Sélectionnez une compétence :\n \n- Attaquer (1) \n- Guérison (2) \n",
+      "Select a skill:\n \n- Attack (1) \n- Healing (2) \n",
       async (answer) => {
         if (answer === "1") {
-          Vilains.hp -= Link.str;
+          Villains.hp -= Link.str;
           console.log(
-            "Votre attaque réussit, vous faîtes " +
+            "Your attack succeeds, you deal " +
               hero.str +
-              " de dégâts au " +
-              ennemi.name +
+              " damage to the " +
+              enemy.name +
               " : \n"
           );
-          resolve({ Link, Vilains });
+          resolve({ Link, Villains });
         } else if (answer === "2") {
           if (players.Link.hp + players.Link.hp_max / 2 > players.Link.hp_max) {
             Link.hp = Link.hp_max;
           } else Link.hp += Link.hp_max / 2;
-          console.log("Vous utilisez Guérison\n");
-          resolve({ Link, Vilains });
+          console.log("You use Healing\n");
+          resolve({ Link, Villains });
         } else {
-          const result = await choice(Link, Vilains);
+          const result = await choice(Link, Villains);
           resolve(result);
         }
       }
@@ -73,20 +71,20 @@ async function choice(
   });
 }
 
-function displayParameters(i: number, Vilains: Character, Link: Character) {
+function displayParameters(i: number, Villains: Character, Link: Character) {
   2;
 
   console.log("\n========== BATTLE " + i + " ==========\n");
-  console.log("\x1b[31m%s\x1b[0m", Vilains.name);
+  console.log("\x1b[31m%s\x1b[0m", Villains.name);
   process.stdout.write("HP : ");
-  for (let j = 0; j < Vilains.hp_max; j++) {
-    if (j < Vilains.hp) {
+  for (let j = 0; j < Villains.hp_max; j++) {
+    if (j < Villains.hp) {
       process.stdout.write("❤️");
     } else {
       process.stdout.write("☠️");
     }
   }
-  console.log("  " + Vilains.hp + "/" + Vilains.hp_max);
+  console.log("  " + Villains.hp + "/" + Villains.hp_max);
 
   console.log("\n\x1b[32m%s\x1b[0m", Link.name);
   process.stdout.write("HP : ");
@@ -101,9 +99,9 @@ function displayParameters(i: number, Vilains: Character, Link: Character) {
   console.log("\n -----Options--------\n");
 }
 
-function ennemiDamage(players: Characters): Characters {
-  if (players.Vilains.hp > 0) {
-    players.Link.hp -= players.Vilains.str;
+function enemyDamage(players: Characters): Characters {
+  if (players.Villains.hp > 0) {
+    players.Link.hp -= players.Villains.str;
   }
   return players;
 }
@@ -111,16 +109,16 @@ function ennemiDamage(players: Characters): Characters {
 async function main() {
   let Link: Character = hero;
   let heroAlive: boolean = true;
-  let ennemiLength = 1;
-  for (let i = 1; ennemiLength <= 10 && heroAlive; i++) {
-    let Vilains: Character = {
+  let enemyLength = 1;
+  for (let i = 1; enemyLength <= 10 && heroAlive; i++) {
+    let Villains: Character = {
       name: "Bokoblin",
       hp: 30,
       hp_max: 30,
       str: 5,
     };
-    if (ennemiLength === 10) {
-      Vilains = {
+    if (enemyLength === 10) {
+      Villains = {
         name: "Naruto",
         hp: 30,
         hp_max: 30,
@@ -130,25 +128,25 @@ async function main() {
     let alive = true;
 
     while (alive && heroAlive === true) {
-      displayParameters(i, Vilains, Link);
-      let Characters: Characters = await choice(Link, Vilains);
-      players = ennemiDamage(players);
-      Vilains = Characters.Vilains;
+      displayParameters(i, Villains, Link);
+      let Characters: Characters = await choice(Link, Villains);
+      players = enemyDamage(players);
+      Villains = Characters.Villains;
       hero = Characters.Link;
       if (Link.hp <= 0) {
-        console.log("Vous êtes vraiment nul ! Recommencez l'aventure");
+        console.log("You are really bad! Start the adventure over");
         heroAlive = false;
         break;
       }
-      if (Vilains.hp <= 0) {
-        console.log("Ennemi vaincu ! Passez à l'étage suivant");
+      if (Villains.hp <= 0) {
+        console.log("Enemy defeated! Move on to the next level");
         alive = false;
         if (i < 9) {
-          console.log("Préparez-vous pour le prochain ennemi !");
+          console.log("Get ready for the next enemy!");
         }
-        ennemiLength++;
+        enemyLength++;
       }
-      if (ennemiLength === 10) {
+      if (enemyLength === 10) {
         console.log("\n🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨BOSS🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨🚨");
       }
     }
